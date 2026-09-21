@@ -1,4 +1,4 @@
-# Salem Google TV Emulator v1.0
+# Salem Google TV Emulator v1.0.1
 
 A Windows launcher and remote for the official Android Emulator running Google TV.
 Salem is the product owner. This is an independent application, not an official Google product.
@@ -16,7 +16,7 @@ The emulator remains a separate official window. Closing Salem or its floating r
 
 First-time setup requires at least 16 GB free for downloads, extraction and device data. It uses a fixed reviewed manifest, verifies bootstrap checksums, logs each operation and revalidates existing components on retry. Failed package repairs roll back. Windows feature changes prompt for administrator approval and setup pauses until reboot.
 
-This is a **staged upload candidate**. Version remains 1.0 until the owner confirms the publication version; public version 1.0 has not been replaced. Packaging does not imply new runtime testing or clean-machine certification.
+Publication version **1.0.1** is confirmed by the owner. This publication rebuild updates product version metadata and packages the approved fixes. No new tests or live validation were run for this publication; clean-machine certification remains outstanding.
 
 The candidate includes strict portable Microsoft JDK validation, shared generation-scoped remote/session handling with a bounded ordered queue, and Salem's geometric D-pad hitboxes. Existing healthy pinned JDK installations are reused.
 

@@ -99,7 +99,7 @@ def main() -> int:
         preflight()
         logging.getLogger(__name__).info("Starting %s %s; Python %s; %s; executable=%s", __app_name__, __version__, platform.python_version(), platform.platform(), sys.executable)
         if sys.platform == "win32":
-            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("Salem.GoogleTVEmulator.1.0")
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(f"Salem.GoogleTVEmulator.{__version__}")
         if report:
             return self_test(report)
         from .app import main as run_app

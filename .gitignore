@@ -1,0 +1,13 @@
+.venv*/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+build/
+dist/
+build_local/
+release_github/
+validation/
+*.spec.bak
+candidate/

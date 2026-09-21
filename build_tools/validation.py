@@ -18,7 +18,10 @@ def verify_metadata(executable: Path, version: str) -> dict:
             for entry in group:
                 for table in getattr(entry, "StringTable", []):
                     strings.update({k.decode(): v.decode() for k, v in table.entries.items()})
-        if strings.get("ProductName") != "Salem Google TV Emulator" or strings.get("ProductVersion", "").removesuffix(".0.0") != version:
+        expected = version.split(".")
+        actual = strings.get("ProductVersion", "").split(".")
+        if (strings.get("ProductName") != "Salem Google TV Emulator"
+                or actual + ["0"] * (4 - len(actual)) != expected + ["0"] * (4 - len(expected))):
             raise RuntimeError(f"Incorrect product metadata in {executable.name}: {strings}")
         if pe.OPTIONAL_HEADER.Subsystem != 2:
             raise RuntimeError(f"Console subsystem in {executable.name}")

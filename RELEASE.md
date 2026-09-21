@@ -1,10 +1,10 @@
-# Building Salem Google TV Emulator v1.0
+# Building Salem Google TV Emulator v1.0.1
 
 ## Upload-only staging
 
-The current upload preparation reuses the already-approved local application EXE,
-refreshes documentation/payload manifests, and rebuilds the installer around the
-same Portable.zip payload. It does not rerun application, emulator, DPI, installer
+The current publication preparation rebuilds the approved application with 1.0.1
+version metadata, refreshes documentation/payload manifests, and rebuilds the
+installer around the matching Portable.zip payload. It does not rerun application, emulator, DPI, installer
 or automated test suites. Archive inventories and SHA-256 records describe the
 staged files, not a new runtime certification.
 
@@ -13,8 +13,8 @@ the binary release folder. GitHub Release assets are Setup.exe, Portable.zip,
 Source.zip, version.json and the accompanying release documentation/manifests.
 Do not upload local validation reports, caches, engine data or temporary build
 helpers. Developer audit notes are excluded from the upload source allowlist.
-Version remains 1.0 pending owner confirmation; preparation does not publish or
-replace public v1.0. The official Android Emulator Extended Controls built-in
+The owner confirmed publication version 1.0.1. The historical v1.0 release is
+retained. The official Android Emulator Extended Controls built-in
 D-pad remains deferred, separately from the fixed Salem DPadWidget.
 
 ## Clean build
@@ -37,9 +37,9 @@ The build tests the packaged GUI at 100%, 150% and 200% scaling, an extracted re
 
 Only after these checks pass are both `candidate/build_local/` and `candidate/release_github/` replaced. Existing public v1.0 files in the root `build_local/` and `release_github/` are never replaced. Previous candidate copies are retained temporarily under `build/release-stage/previous-*`; a failed promotion rolls back. Close candidate Salem EXEs before rebuilding. No release is published automatically.
 
-Upload one set of the installer/portable/source files, plus the standalone `version.json` asset, README, CHANGELOG, third-party notices, build manifest and hashes. Generic `Setup.exe`, `Portable.zip`, `Source.zip` and branded aliases are byte-identical pairs.
+Upload the canonical `Setup.exe`, `Portable.zip` and `Source.zip`, plus standalone `version.json`, VERSION, toolchain manifest, README, CHANGELOG, RELEASE, third-party notices, build manifest and hashes. Do not upload duplicate branded aliases.
 
-The app and installer remain version 1.0, with internal candidate identifier `rework-2026-09-19`. Executable Windows version resources use 1.0.0.0. No signing certificate is configured; SmartScreen may warn. Optional signing uses `SALEM_SIGNTOOL` (absolute SDK signtool path) and `SALEM_SIGN_THUMBPRINT` (Windows certificate-store identity); configured signing errors fail the build. No private key/password is stored in source.
+The app and installer are version 1.0.1. Executable Windows version resources use 1.0.1.0. No signing certificate is configured; SmartScreen may warn. Optional signing uses `SALEM_SIGNTOOL` (absolute SDK signtool path) and `SALEM_SIGN_THUMBPRINT` (Windows certificate-store identity); configured signing errors fail the build. No private key/password is stored in source.
 
 ## Clean-PC release gate
 

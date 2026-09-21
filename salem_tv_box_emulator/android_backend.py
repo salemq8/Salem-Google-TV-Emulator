@@ -732,7 +732,7 @@ def build_setup_instructions(selected_type: str, tools: ToolPaths, avds: list[Av
         lines.append("")
         lines.append("Detected AVDs:")
         for avd in avds:
-            tv = avd.tv_type or "not supported by Salem v1.0"
+            tv = avd.tv_type or "not supported by Salem v1.0.1"
             lines.append(f"- {avd.detail} [{tv}]")
     return "\n".join(lines)
 

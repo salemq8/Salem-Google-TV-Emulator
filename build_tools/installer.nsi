@@ -6,7 +6,7 @@ Unicode true
 
 !define APP "Salem Google TV Emulator"
 !define REGKEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\SalemGoogleTVEmulator"
-Name "${APP} v1.0"
+Name "${APP} v1.0.1"
 OutFile "${STAGE}\dist\Setup.exe"
 InstallDir "$LOCALAPPDATA\Programs\${APP}"
 RequestExecutionLevel user
@@ -14,10 +14,10 @@ ManifestSupportedOS all
 SetCompressor /SOLID lzma
 Icon "${ROOT}\assets\salem_google_tv_emulator.ico"
 UninstallIcon "${ROOT}\assets\salem_google_tv_emulator.ico"
-VIProductVersion "1.0.0.0"
+VIProductVersion "1.0.1.0"
 VIAddVersionKey /LANG=1033 "ProductName" "${APP}"
-VIAddVersionKey /LANG=1033 "ProductVersion" "1.0"
-VIAddVersionKey /LANG=1033 "FileVersion" "1.0"
+VIAddVersionKey /LANG=1033 "ProductVersion" "1.0.1"
+VIAddVersionKey /LANG=1033 "FileVersion" "1.0.1"
 VIAddVersionKey /LANG=1033 "CompanyName" "Salem"
 VIAddVersionKey /LANG=1033 "FileDescription" "${APP} Setup"
 VIAddVersionKey /LANG=1033 "LegalCopyright" "Copyright Salem"
@@ -97,7 +97,7 @@ Section "${APP} (required)" Main
       MessageBox MB_OK|MB_ICONEXCLAMATION "Application installed, but the Start Menu shortcut could not be created. Open the EXE from $INSTDIR\${APP}." /SD IDOK
     ${EndIf}
     WriteRegStr HKCU "${REGKEY}" "DisplayName" "${APP}"
-    WriteRegStr HKCU "${REGKEY}" "DisplayVersion" "1.0"
+    WriteRegStr HKCU "${REGKEY}" "DisplayVersion" "1.0.1"
     WriteRegStr HKCU "${REGKEY}" "Publisher" "Salem"
     WriteRegStr HKCU "${REGKEY}" "InstallLocation" "$INSTDIR"
     WriteRegStr HKCU "${REGKEY}" "DisplayIcon" "$INSTDIR\${APP}\${APP}.exe,0"

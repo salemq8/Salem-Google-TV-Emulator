@@ -1,6 +1,6 @@
 # Third-party components
 
-Salem Google TV Emulator v1.0 uses Python, PySide6-Essentials/Qt, shiboken6 and packaging. PyInstaller packages the application and has its own bootloader distribution exception. Applicable notices supplied with the pinned distributions are copied into the release's `licenses/` directory; Python's license is included there too.
+Salem Google TV Emulator v1.0.1 uses Python, PySide6-Essentials/Qt, shiboken6 and packaging. PyInstaller packages the application and has its own bootloader distribution exception. Applicable notices supplied with the pinned distributions are copied into the release's `licenses/` directory; Python's license is included there too.
 
 Qt/PySide shared libraries remain separate files and are not statically linked into Salem. Review the included license texts, distribution obligations and source availability before public redistribution. Upstream component sources are available from https://code.qt.io/ (Qt), https://code.qt.io/pyside/pyside-setup.git (PySide/shiboken), https://github.com/python/cpython (Python), https://github.com/pypa/packaging and https://github.com/pyinstaller/pyinstaller. Matching versions are recorded in `build-manifest.json`.
 

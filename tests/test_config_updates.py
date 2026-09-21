@@ -86,4 +86,4 @@ def test_release_version_matches():
     from pathlib import Path
     from salem_tv_box_emulator import __version__
     root = Path(__file__).resolve().parents[1]
-    assert __version__ == (root / "VERSION").read_text().strip() == json.loads((root / "version.json").read_text())["version"] == "1.0"
+    assert __version__ == (root / "VERSION").read_text().strip() == json.loads((root / "version.json").read_text())["version"] == "1.0.1"

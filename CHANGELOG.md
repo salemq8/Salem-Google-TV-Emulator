@@ -1,6 +1,17 @@
 # Salem Google TV Emulator Changelog
 
-## v1.0 - 2026-06-11
+## v1.0.1 - 2026-09-21
+
+- Published the approved engineering rework with synchronized 1.0.1 app, installer and release metadata.
+- Fixed pinned Microsoft OpenJDK full-version/vendor/x64 validation, successful stderr version output handling and healthy JDK reuse.
+- Included shared RemoteService/session fixes, ordered bounded dispatch and stale-generation rejection.
+- Included the geometric Salem DPadWidget: gap-free directional ring, circular OK, shared hover/pressed geometry and one command per press.
+- Preserved working emulator, setup, TV Mode, remote, text and audio behavior during publication preparation.
+- Canonical downloads: Setup.exe, Portable.zip and Source.zip; no duplicate branded aliases.
+- No new tests or live validation were run for this version-only publication rebuild.
+- Android Emulator Extended Controls built-in D-pad remains deferred, separately from Salem Remote.
+
+## v1.0 - 2026-06-11 (Historical Release)
 
 - Released Salem Google TV Emulator v1.0 as a Google TV focused Windows launcher.
 - Renamed the Windows product identity to Salem Google TV Emulator.
@@ -14,9 +25,9 @@
 - Added a complete release UI with Home, Remote, Text Input, Audio, TV Mode, Network & Performance, Diagnostics, Settings, Updates, Setup / Repair, Support, and About pages.
 - Added AppUserModelID, in-app logo/header branding, local-only settings, latest GitHub Release `version.json` update checks, mailto support draft, and privacy-safe release package scan.
 - Set the support contact to `1salembot.support@gmail.com`.
-## Unreleased Engineering Candidate - rework-2026-09-19
+## Engineering Rework Included in v1.0.1
 
-- Upload staging retains version 1.0 pending the owner's version confirmation; no public release is replaced automatically.
+- Owner confirmed publication version 1.0.1.
 - Fixed pinned Microsoft OpenJDK validation using full runtime/build version parsing, valid x64 executable checks, Microsoft metadata and successful command status, including version output on stderr. Healthy installations are reused.
 - Preserved positive AVD/session binding, ordered remote dispatch, the 16-command bound and stale-generation rejection across stop/reconnect/restart.
 - Replaced Salem Remote's rectangular D-pad buttons with a single geometric DPadWidget: circular OK, gap-free directional ring, shared hover/pressed hit-testing and one command per press, scaled from current widget dimensions.
@@ -24,10 +35,10 @@
 - Replaced the monolithic interface with a coherent sidebar UI, shared remote, focused services and ordered background operations.
 - Added validated atomic preferences, honest update errors/version comparison, actionable text failures and persistent activity diagnostics.
 - Added a standard-library startup boundary, runtime manifest validation, bundled Qt/VC dependency checks, pinned clean builds and relocated/DPI/installed smoke tests.
-- Installer now verifies staged payloads before replacement and reports shortcut failures. Version remains 1.0.
+- Installer now verifies staged payloads before replacement and reports shortcut failures.
 - Customer-specific QtCore root cause and clean-PC certification remain separate verification gates; see RELEASE.md.
 - Introduced a generation-scoped emulator session shared by remote, text and audio, with positive AVD correlation and rejection of stale queued commands after restart/reconnection.
 - Replaced mutable SDK acquisition with a pinned candidate toolchain, verified downloads, logged command/exit results, explicit Android CLI capability detection and pinned compatibility fallback.
 - Added staged package repair/rollback, durable setup failure details and a virtualization/reboot preflight.
 - Added a native installer OS check, optional desktop shortcut, uninstall registration, safe explicit-file uninstall, metadata checks and candidate-only output promotion.
-- Public v1.0 remains unchanged; candidate tooling and clean-machine/live-engine behavior are not yet certified.
+- The historical v1.0 release is retained. Clean-machine certification remains outstanding.

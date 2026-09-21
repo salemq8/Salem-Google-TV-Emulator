@@ -13,7 +13,7 @@ import zipfile
 from pathlib import Path
 
 APP_NAME = "Salem Google TV Emulator"
-VERSION = "1.0"
+VERSION = "1.0.1"
 
 
 def extract_verified(archive_path: Path, stage: Path) -> Path:
