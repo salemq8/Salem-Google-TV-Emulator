@@ -1,0 +1,18 @@
+[tool.ruff]
+target-version = "py314"
+line-length = 120
+exclude = ["build", "dist", "build_local", "release_github", "validation"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.mypy]
+python_version = "3.14"
+files = ["salem_tv_box_emulator/config.py", "salem_tv_box_emulator/services/updates.py"]
+check_untyped_defs = true
+disallow_untyped_defs = true
+

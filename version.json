@@ -1,0 +1,9 @@
+{
+  "name": "Salem Google TV Emulator",
+  "version": "1.0",
+  "channel": "stable",
+  "platform": "Windows 10/11",
+  "product_focus": "Google TV",
+  "avd_name": "Salem_Google_TV",
+  "release_date": "2026-06-11"
+}

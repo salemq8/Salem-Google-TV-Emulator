@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import json
+import ctypes
 import subprocess
 import sys
 from dataclasses import dataclass
-from pathlib import Path
 
 from .android_backend import CREATE_NO_WINDOW, SALEM_LOG_DIR
 
@@ -74,10 +74,13 @@ def enable_hypervisor_features_elevated(feature_names: list[str]) -> str:
         return "No features to enable."
 
     SALEM_LOG_DIR.mkdir(parents=True, exist_ok=True)
+    if any(name not in REQUIRED_FEATURES for name in feature_names):
+        raise ValueError("Unexpected Windows feature name")
+    FEATURE_STATUS_PATH.unlink(missing_ok=True)
     status_path_json = json.dumps(str(FEATURE_STATUS_PATH))
     features_array = "@(" + ",".join(json.dumps(name) for name in feature_names) + ")"
     commands = [
-        "$ErrorActionPreference = 'Continue'",
+        "$ErrorActionPreference = 'Stop'",
         f"Start-Transcript -Path {json.dumps(str(FEATURE_LOG_PATH))} -Force",
         f"$features = {features_array}",
         "$changed = $false",
@@ -85,7 +88,8 @@ def enable_hypervisor_features_elevated(feature_names: list[str]) -> str:
         "foreach ($feature in $features) {",
         "  $before = Get-WindowsOptionalFeature -Online -FeatureName $feature",
         "  if ($before.State -ne 'Enabled') {",
-        "    dism.exe /online /enable-feature /featurename:$feature /all /norestart",
+        "    dism.exe /English /online /enable-feature /featurename:$feature /all /norestart",
+        "    if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 3010) { throw \"DISM failed: $LASTEXITCODE\" }",
         "    $changed = $true",
         "  }",
         "  $after = Get-WindowsOptionalFeature -Online -FeatureName $feature",
@@ -107,6 +111,7 @@ def enable_hypervisor_features_elevated(feature_names: list[str]) -> str:
         (
             "Start-Process powershell.exe "
             "-Verb RunAs "
+            "-WindowStyle Hidden "
             "-Wait "
             f"-ArgumentList '-NoProfile -ExecutionPolicy Bypass -File ''{escaped_script}'''"
         ),
@@ -129,6 +134,8 @@ def check_and_enable_hypervisor_features_elevated(feature_names: list[str] | Non
     names = feature_names or list(REQUIRED_FEATURES)
     output = enable_hypervisor_features_elevated(names)
     status_data = _read_elevated_feature_status()
+    if not status_data:
+        raise RuntimeError("Windows feature check did not return a status. Administrator approval may have been cancelled. Retry and open the feature log for details.")
     changed = bool(status_data.get("Changed"))
     features: list[WindowsFeature] = []
     raw_features = status_data.get("Features") or []
@@ -145,7 +152,23 @@ def check_and_enable_hypervisor_features_elevated(feature_names: list[str] | Non
 
 def save_pending_fix_launch(selected_type: str) -> None:
     SALEM_LOG_DIR.mkdir(parents=True, exist_ok=True)
-    PENDING_FIX_PATH.write_text(json.dumps({"selected_type": "google_tv"}, indent=2), encoding="utf-8")
+    import time
+    uptime = ctypes.windll.kernel32.GetTickCount64
+    uptime.restype = ctypes.c_ulonglong
+    boot_time = time.time() - uptime() / 1000
+    PENDING_FIX_PATH.write_text(json.dumps({"selected_type": "google_tv", "boot_time": boot_time}, indent=2), encoding="utf-8")
+
+
+def pending_reboot() -> bool:
+    import time
+    try:
+        data = json.loads(PENDING_FIX_PATH.read_text(encoding="utf-8"))
+        uptime = ctypes.windll.kernel32.GetTickCount64
+        uptime.restype = ctypes.c_ulonglong
+        boot_time = time.time() - uptime() / 1000
+        return abs(boot_time - float(data["boot_time"])) < 120
+    except (OSError, ValueError, KeyError):
+        return False
 
 
 def load_pending_fix_launch() -> str | None:
@@ -168,7 +191,7 @@ def clear_pending_fix_launch() -> None:
 
 def _check_feature(name: str) -> WindowsFeature:
     result = subprocess.run(
-        ["dism.exe", "/online", "/Get-FeatureInfo", f"/FeatureName:{name}"],
+        ["dism.exe", "/English", "/online", "/Get-FeatureInfo", f"/FeatureName:{name}"],
         capture_output=True,
         text=True,
         timeout=60,

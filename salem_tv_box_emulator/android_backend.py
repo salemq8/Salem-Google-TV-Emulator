@@ -9,10 +9,10 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
+from .services.session import EmulatorSession, SessionBinder, SessionState, RemoteSessionUnavailable
 
 
 CREATE_NO_WINDOW = 0x08000000 if sys.platform == "win32" else 0
-DETACHED_PROCESS = 0x00000008 if sys.platform == "win32" else 0
 CREATE_NEW_PROCESS_GROUP = 0x00000200 if sys.platform == "win32" else 0
 # DETACHED_PROCESS makes Android Emulator's qemu child open a visible Windows Terminal
 # window on Windows 11. CREATE_NO_WINDOW keeps the console hidden while the process
@@ -281,14 +281,25 @@ class EmulatorController:
         self.process: subprocess.Popen[str] | None = None
         self.emulator_process: subprocess.Popen[str] | None = None
         self.current_avd: AvdInfo | None = None
-        self.device_serial: str | None = None
+        self.session = EmulatorSession()
+        self.binder = SessionBinder(self.session, self._query_binding)
         self.launch_info: LaunchInfo | None = None
         self.last_adb_output = ""
         self._log_handle = None
 
     @property
     def is_running(self) -> bool:
-        return bool((self.process and self.process.poll() is None) or (self.current_avd and self._current_serial()))
+        return bool(self.process and self.process.poll() is None)
+
+    @property
+    def device_serial(self) -> str | None:
+        return self.session.serial
+
+    def _query_binding(self, args: list[str], timeout: int) -> tuple[int, str]:
+        if not self.tools.adb:
+            return 1, "ADB unavailable"
+        result = _run([str(self.tools.adb), *args], timeout, self._emulator_environment())
+        return result.returncode, result.stdout.strip()
 
     def start(self, avd: AvdInfo, extra_args: list[str] | None = None) -> int:
         return self.start_with_info(avd, extra_args).pid
@@ -341,7 +352,7 @@ class EmulatorController:
         )
         self.emulator_process = self.process
         self.current_avd = avd
-        self.device_serial = None
+        self.session.begin(avd.name, self.process.pid, prelaunch_serials)
         self.launch_info = LaunchInfo(
             pid=self.process.pid,
             command=args,
@@ -368,7 +379,7 @@ class EmulatorController:
         return self.launch_info
 
     def refresh_device_serial(self) -> str | None:
-        serial = self._current_serial()
+        serial = self.binder.poll()
         if serial and self.launch_info and self.launch_info.serial != serial:
             self.launch_info = LaunchInfo(
                 pid=self.launch_info.pid,
@@ -383,10 +394,8 @@ class EmulatorController:
         return serial
 
     def wait_for_emulator_device(self, timeout_seconds: int = 90, prelaunch_serials: set[str] | None = None) -> str:
-        prelaunch_serials = prelaunch_serials or set()
         deadline = time.monotonic() + timeout_seconds
         last_devices = ""
-        fallback_serial: str | None = None
         while time.monotonic() < deadline:
             if self.process and self.process.poll() is not None:
                 raise RuntimeError(
@@ -396,17 +405,10 @@ class EmulatorController:
                 )
             devices_output = self.adb_devices_output()
             last_devices = devices_output
-            for device in self._list_adb_devices_with_env():
-                if device.serial.startswith("emulator-") and device.state == "device":
-                    if device.serial not in prelaunch_serials:
-                        self.device_serial = device.serial
-                        self.last_adb_output = f"Detected ready emulator serial: {device.serial}\n\n{devices_output}"
-                        return device.serial
-                    fallback_serial = fallback_serial or device.serial
-            if fallback_serial and time.monotonic() > deadline - 10:
-                self.device_serial = fallback_serial
-                self.last_adb_output = f"Using existing ready emulator serial: {fallback_serial}\n\n{devices_output}"
-                return fallback_serial
+            serial = self.refresh_device_serial()
+            if serial:
+                self.last_adb_output = f"Bound ready Google TV session: {serial}\n\n{devices_output}"
+                return serial
             time.sleep(2)
         raise RuntimeError(
             f"No emulator-* device appeared as 'device' after {timeout_seconds} seconds.\n\n"
@@ -415,7 +417,8 @@ class EmulatorController:
         )
 
     def stop(self) -> None:
-        serial = self._current_serial()
+        serial = self.session.serial
+        self.session.invalidate(SessionState.STOPPING)
         process_pid = self.process.pid if self.process else None
         if self.tools.adb and serial:
             _run([str(self.tools.adb), "-s", serial, "emu", "kill"], timeout=8)
@@ -439,7 +442,7 @@ class EmulatorController:
         self.process = None
         self.emulator_process = None
         self.current_avd = None
-        self.device_serial = None
+        self.session.invalidate()
         self.launch_info = None
         self._close_log_handle()
 
@@ -588,12 +591,7 @@ class EmulatorController:
         return devices
 
     def _current_serial(self) -> str | None:
-        if self.device_serial:
-            return self.device_serial
-        if self.current_avd:
-            self.device_serial = find_device_for_avd(self.tools, self.current_avd.name)
-            return self.device_serial
-        return None
+        return self.session.serial if self.session.ready else None
 
     def _run_adb(self, args: list[str], timeout: int) -> AdbCommandResult:
         if not self.tools.adb:
@@ -604,17 +602,18 @@ class EmulatorController:
         command = [str(self.tools.adb)]
         command.extend(["-s", serial])
         command.extend(args)
-        result = subprocess.run(
-            command,
-            capture_output=True,
-            text=True,
-            timeout=timeout,
-            creationflags=CREATE_NO_WINDOW,
-            env=self._emulator_environment(),
-            errors="replace",
-        )
+        try:
+            result = subprocess.run(command, capture_output=True, text=True, timeout=timeout,
+                                    creationflags=CREATE_NO_WINDOW, env=self._emulator_environment(), errors="replace")
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            self.session.invalidate(SessionState.RECONNECTING)
+            raise RemoteSessionUnavailable("ADB command interrupted. Reconnecting; the command was not replayed.") from exc
         output = "\n".join(part for part in [result.stdout.strip(), result.stderr.strip()] if part)
         self.last_adb_output = f"$ {subprocess.list2cmdline(command)}\nexit code: {result.returncode}\n{output}".strip()
+        if result.returncode == 0:
+            self.session.last_successful_command = " ".join(args[:3])
+        elif any(word in output.lower() for word in ("device offline", "device not found", "no devices", "unauthorized", "device '", "transport error")):
+            self.session.invalidate(SessionState.RECONNECTING)
         return AdbCommandResult(command, result.returncode, output)
 
     def _paste_with_android_clipboard(self, text: str) -> tuple[bool, str]:

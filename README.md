@@ -1,118 +1,68 @@
 # Salem Google TV Emulator v1.0
 
-Salem Google TV Emulator is a Windows 10/11 desktop product for launching and controlling Google TV through Google's official Android Emulator.
+A Windows launcher and remote for the official Android Emulator running Google TV.
+Salem is the product owner. This is an independent application, not an official Google product.
+The custom Salem icon is not a Google logo.
 
-Salem does not build an emulator from scratch. It installs and manages the official Android SDK command-line tools, creates the `Salem_Google_TV` AVD, launches `emulator.exe`, detects the active ADB serial, and gives normal users a polished TV-style launcher.
+## Install and use
 
-## Product Focus
+- Candidate target: Windows 10 version 1809 or later (64-bit), or Windows 11; a supported x64 CPU and hardware virtualization are required. This is the runtime floor, not completed clean-machine certification. Windows 7/8/8.1 and ARM64 are not supported.
+- Run `Setup.exe` for a per-user installation and Start Menu shortcut. A desktop shortcut is optional. Close Salem before upgrading.
+- Alternatively extract **all** of `Portable.zip` and open `Salem Google TV Emulator.exe` inside its folder. Do not move the EXE out of that folder.
+- Python, Java and Android Studio are not required on the user's PC. The app bundles its own Python/Qt runtime; Engine Setup installs portable Java and official Android tools after confirmation.
+- On Overview, launch Google TV. If the engine is missing, open Setup & repair. License acceptance and Windows feature elevation require explicit confirmation. Reboot when requested.
 
-- Google TV only.
-- One clear launch path: Launch Google TV.
-- Premium dark Windows dashboard with left navigation.
-- Custom Salem TV/remote icon artwork. It does not use official Google logo assets.
-- No Android Studio requirement when Salem's setup wizard can install the command-line tools.
-- Android Studio remains optional for manual SDK management.
+The emulator remains a separate official window. Closing Salem or its floating remote does not stop Google TV. Use Stop explicitly. Active TV Mode is restored before Stop, Restart, or closing Salem.
 
-## Main Screens
+First-time setup requires at least 16 GB free for downloads, extraction and device data. It uses a fixed reviewed manifest, verifies bootstrap checksums, logs each operation and revalidates existing components on retry. Failed package repairs roll back. Windows feature changes prompt for administrator approval and setup pauses until reboot.
 
-- Home: product header, Google TV status, launch controls, TV Mode shortcuts, quick ADB/window/audio/network status, logs, and diagnostics.
-- Remote: circular D-pad, OK, Back, Home, Menu, volume, mute, Power/Stop, and pop-out remote.
-- Text Input: Send Text to TV with English, Arabic, numbers, symbols, and fallback input paths.
-- Audio: Volume Up, Volume Down, Mute, Test Sound, and audio diagnostics.
-- TV Mode: Enter/Exit TV Mode, F11 hint, selected emulator window, and viewport fill diagnostics.
-- Network & Performance: read-only network diagnostics and safe AVD RAM/CPU/GPU settings.
-- Diagnostics: copy diagnostics, open logs, latest emulator log, ADB output, adb devices, launch command, PID, active serial, TV Mode candidates, and window hierarchy.
-- Settings: theme, language placeholder, auto update, log retention, local settings save/reset, and log cleanup.
-- Updates: current version, manual update check, auto update checkbox, and honest GitHub Releases `version.json` skeleton.
-- Setup / Repair: Install Google TV Engine, Retry Setup, Refresh, Install APK, setup progress, and manual Google TV package override.
-- Support: support email, open logs, copy diagnostic info, mailto draft, and Discord placeholder.
-- About: version, product identity, official Android Emulator backend note, and custom icon/legal note.
+This is a **staged upload candidate**. Version remains 1.0 until the owner confirms the publication version; public version 1.0 has not been replaced. Packaging does not imply new runtime testing or clean-machine certification.
 
-## Core Features
+The candidate includes strict portable Microsoft JDK validation, shared generation-scoped remote/session handling with a bounded ordered queue, and Salem's geometric D-pad hitboxes. Existing healthy pinned JDK installations are reused.
 
-- Launch Google TV, Stop Google TV, Restart Google TV, and Fix Everything & Launch.
-- One-button Install Google TV Engine setup wizard.
-- Portable Microsoft OpenJDK 21 installed into `C:\Users\Public\SalemTVBox\JDK21`.
-- Android SDK tools installed into `C:\Users\Public\SalemTVBox\AndroidSDK`.
-- Google TV system-image detection from `sdkmanager --list`.
-- Automatic `Salem_Google_TV` AVD creation.
-- Automatic HypervisorPlatform and VirtualMachinePlatform checks with restart warning when Windows features change.
-- Dynamic ADB serial detection for `emulator-XXXX` devices.
-- On-screen remote and pop-out remote titled `Salem Remote`.
-- Keyboard shortcuts for D-pad, OK, Back, Home, and F11 TV Mode.
-- Send Text to TV with direct ADB input, clipboard paste fallback, and character-by-character fallback.
-- Audio controls: Volume Up, Volume Down, Mute, and Test Sound.
-- Safe performance controls for Google TV AVD RAM, CPU cores, GPU host mode, and network diagnostics.
+## Controls
 
-## Run From Source
+Overview provides Launch, Stop, Restart, TV Mode, Remote, Pop-out Remote, repair and APK installation.
+Remote & input has the shared D-pad, Back/Home/Menu, volume/mute, text input and Test Sound.
+The entire Salem D-pad circle is interactive: the center selects OK and the outer ring selects a direction. Hover and pressed feedback use the same geometry, with one command per press.
+F11 toggles TV Mode while Salem is focused. Arrow keys, Enter, Escape/Backspace and Home send remote actions except when editing a field.
 
-```bat
-run.bat
-```
+Text uses the existing ADB input, clipboard and per-character fallbacks. Arabic/Unicode support depends on the installed image's clipboard command and focused input method. Failures are displayed; command success alone cannot prove a TV app accepted the text.
+Test Sound sets media volume to 10; it does not synthesize a sound. Audible verification requires playing content in the TV app.
 
-Or manually:
+TV Mode preserves the existing Win32 borderless implementation. Outer-window coverage does not prove the internal Qt viewport fills the screen. The emulator toolbar can remain; candidate geometry and child hierarchy are reported without claiming a render surface was conclusively identified.
 
-```bat
-py -3 -m pip install -r requirements.txt
-py -3 -m salem_tv_box_emulator
-```
+Deferred: the official Android Emulator Extended Controls built-in D-pad is separate from Salem Remote and remains deferred for later investigation.
 
-## Automatic Setup
+## Preferences, updates and support
 
-1. Run Salem.
-2. Press Install Google TV Engine.
-3. Confirm SDK license acceptance when prompted.
-4. Wait for setup stages to complete.
-5. Press Launch Google TV.
+Dark, Light and System themes, log retention, startup update checks and floating-remote topmost preferences are saved atomically. The interface is English; Arabic text entry is supported subject to the engine limitations above. Old language preferences are retained in data, but the previous untranslated language selector is no longer offered.
 
-If automatic package detection fails, open Setup / Repair, paste a full Google TV system-image package path into Manual Google TV Package, and press Retry Setup.
+Update checks read `version.json` from the latest public GitHub Release assets of `salemq8/Salem-Google-TV-Emulator`. They never automatically execute downloads. HTTP errors, missing assets and invalid metadata are reported honestly. Support opens an email draft to `1salembot.support@gmail.com`; nothing is sent automatically.
 
-## Launch And Control
+## Data and diagnostics
 
-Salem launches the official emulator window with this shape:
+- Engine/JDK: `C:\Users\Public\SalemTVBox\AndroidSDK` and `JDK21`.
+- Emulator log: `C:\Users\Public\SalemTVBox\logs\emulator.log`.
+- Application and startup logs: `%LOCALAPPDATA%\Salem Google TV Emulator\logs`.
+- Preferences: `%APPDATA%\Salem Google TV Emulator\settings.json`.
+- AVDs remain in the existing Android AVD location. Reinstallation does not remove engine data or preferences.
 
-```text
-C:\Users\Public\SalemTVBox\AndroidSDK\emulator\emulator.exe -avd Salem_Google_TV -no-metrics
-```
+Diagnostics separates runtime snapshots, activity and setup output. Rotating `app.log`, `setup.log`, `update.log` and `crash.log` are stored in the application logs folder. Review diagnostic text before sharing; redaction is best-effort and reports can include local paths, device state and entered text.
+An incomplete installation produces an actionable native Windows error even if Qt cannot load.
 
-The app starts the emulator with `subprocess.Popen`, keeps the process reference alive, and writes emulator output to:
+## Development
 
-```text
-C:\Users\Public\SalemTVBox\logs\emulator.log
-```
-
-After launch, Salem polls `adb devices -l` until an `emulator-XXXX` device appears as `device`. The detected serial is stored and used for remote, text, audio, APK, and diagnostics commands.
-
-## TV Mode
-
-TV Mode is a Windows borderless fullscreen mode for the official emulator window. Salem finds the main `Android Emulator - Salem_Google_TV` window, ignores Extended Controls, saves the original style and rectangle, removes the title bar and borders, moves the window to the monitor bounds, and restores the original window when TV Mode exits.
-
-The official emulator toolbar may remain visible depending on emulator settings. Salem v1.0 reports viewport and child-window diagnostics instead of guessing hidden emulator internals.
-
-## Updates
-
-The Updates page is wired for a GitHub Releases `version.json` feed. If no update feed URL is configured, manual checks report `not configured yet` instead of showing fake download states.
-
-## Release Artifacts
-
-The v1.0 release build creates:
-
-- `release_github\Setup.exe`
-- `release_github\Portable.zip`
-- `release_github\Source.zip`
-- `release_github\Salem_Google_TV_Emulator_Setup_v1.0.exe`
-- `release_github\Salem_Google_TV_Emulator_Portable_v1.0.zip`
-- `release_github\Salem_Google_TV_Emulator-v1.0-source.zip`
-- `release_github\version.json`
-- `release_github\README.md`
-- `release_github\CHANGELOG.md`
-- `release_github\RELEASE.md`
-- `release_github\RELEASE_CHECKLIST.md`
-
-Build command:
+Build-machine prerequisite only: Python **3.14.4 x64** with the `py` launcher.
 
 ```powershell
-.\build_tools\build_release.ps1
+py -3.14 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements-build.txt
+.\.venv\Scripts\python.exe main.py
+.\.venv\Scripts\python.exe -m pytest
 ```
 
-PyInstaller is used for EXE generation, app icon embedding, and version metadata.
+`run.bat` is development-only. Releases and shortcuts launch the EXE directly.
+See [Architecture](docs/ARCHITECTURE.md), [Build and release](RELEASE.md) and [Third-party notices](THIRD_PARTY_NOTICES.md).
+
+The local packaged Windows smoke tests are distinct from certification on a clean Windows PC. Do not infer clean-PC/customer-crash verification from a developer-machine pass.

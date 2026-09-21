@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import ctypes
+import os
 import sys
 from ctypes import wintypes
 from dataclasses import dataclass
@@ -148,9 +149,13 @@ def list_emulator_windows(pid: int | None, avd_name: str | None) -> list[WindowC
 
     @ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
     def enum_proc(hwnd: int, _lparam: int) -> bool:
+        window_pid = _window_pid(hwnd)
+        # GetWindowText on our own Qt windows sends a synchronous UI-thread message.
+        # A diagnostics worker must not wait for that thread during shutdown.
+        if window_pid == os.getpid():
+            return True
         title = _window_text(hwnd)
         normalized_title = _normalize_title(title)
-        window_pid = _window_pid(hwnd)
         is_pid_match = bool(pid and window_pid == pid)
         is_related = "android emulator" in normalized_title or bool(avd_hint and avd_hint in normalized_title) or is_pid_match
         if not is_related:

@@ -1,0 +1,18 @@
+-r requirements.txt
+pyinstaller==6.20.0
+pyinstaller-hooks-contrib==2026.5
+altgraph==0.17.4
+pefile==2024.8.26
+pywin32-ctypes==0.2.3
+setuptools==82.0.1
+pytest==9.0.2
+iniconfig==2.3.0
+pluggy==1.6.0
+Pygments==2.19.2
+colorama==0.4.6
+ruff==0.15.6
+mypy==1.19.1
+mypy_extensions==1.1.0
+pathspec==1.0.4
+typing_extensions==4.15.0
+librt==0.8.1

@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "candidate": "rework-2026-09-19",
+  "validation": "candidate pins; clean Windows 10/11 engine validation pending",
+  "windows_min_build": 17763,
+  "required_free_bytes": 17179869184,
+  "jdk": {
+    "version": "21.0.12.1",
+    "url": "https://aka.ms/download-jdk/microsoft-jdk-21.0.12.1-windows-x64.zip",
+    "algorithm": "sha256",
+    "digest": "192441a9d27da813bada974bb88b4cf64d37a9589ed37f204374d411ca5ce07f"
+  },
+  "android_cli": {
+    "version": "1.0.16261425",
+    "url": "https://dl.google.com/android/cli/1.0.16261425/windows_x86_64/android-cli.exe",
+    "algorithm": "sha256",
+    "digest": "203f647c50a3dfed38ccc8337610fc08618161471c9472a16de0abfa8248565e"
+  },
+  "commandline_tools": {
+    "version": "19.0",
+    "url": "https://dl.google.com/android/repository/commandlinetools-win-13114758_latest.zip",
+    "algorithm": "sha1",
+    "digest": "54a582f3bf73e04253602f2d1c80bd5868aac115"
+  },
+  "packages": {
+    "platform-tools": "37.0.1",
+    "emulator": "37.1.11",
+    "system-images;android-36;google-tv;x86_64": "4.0.0"
+  },
+  "image": {
+    "package": "system-images;android-36;google-tv;x86_64",
+    "api": 36,
+    "abi": "x86_64"
+  },
+  "primary_backend": "android-cli",
+  "fallback_backend": "sdkmanager-19.0",
+  "sources": [
+    "https://dl.google.com/android/repository/repository2-3.xml",
+    "https://dl.google.com/android/repository/sys-img/google-tv/sys-img2-3.xml",
+    "https://learn.microsoft.com/en-us/java/openjdk/download"
+  ]
+}

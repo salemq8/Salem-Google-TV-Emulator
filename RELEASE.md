@@ -1,27 +1,56 @@
-# Salem Google TV Emulator v1.0 Release Notes
+# Building Salem Google TV Emulator v1.0
 
-Salem Google TV Emulator v1.0 is the first Google TV-only Windows release.
+## Upload-only staging
 
-## Highlights
+The current upload preparation reuses the already-approved local application EXE,
+refreshes documentation/payload manifests, and rebuilds the installer around the
+same Portable.zip payload. It does not rerun application, emulator, DPI, installer
+or automated test suites. Archive inventories and SHA-256 records describe the
+staged files, not a new runtime certification.
 
-- Professional dark Windows dashboard with complete product navigation.
-- Google TV launch, restart, stop, TV Mode, remote, text input, audio, diagnostics, setup/repair, support, settings, and updates pages.
-- Custom TV/remote inspired app icon. No official Google logo assets are used.
-- Official Android Emulator backend with the `Salem_Google_TV` AVD.
-- Portable JDK 21 and Android SDK command-line setup remain managed by Salem.
-- Privacy-safe diagnostics: logs stay local unless the user copies them or opens a mail draft.
+Repository uploads use the clean source tree (the contents of Source.zip), not
+the binary release folder. GitHub Release assets are Setup.exe, Portable.zip,
+Source.zip, version.json and the accompanying release documentation/manifests.
+Do not upload local validation reports, caches, engine data or temporary build
+helpers. Developer audit notes are excluded from the upload source allowlist.
+Version remains 1.0 pending owner confirmation; preparation does not publish or
+replace public v1.0. The official Android Emulator Extended Controls built-in
+D-pad remains deferred, separately from the fixed Salem DPadWidget.
 
-## Release Files
+## Clean build
 
-- `Salem_Google_TV_Emulator_Setup_v1.0.exe`
-- `Salem_Google_TV_Emulator_Portable_v1.0.zip`
-- `Salem_Google_TV_Emulator-v1.0-source.zip`
-- `version.json`
-- `README.md`
-- `CHANGELOG.md`
-- `RELEASE.md`
-- `RELEASE_CHECKLIST.md`
+Use 64-bit Windows and Python 3.14.4 x64. From the repository root:
 
-## Legal Note
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File build_tools\build_release.ps1
+```
 
-Salem Google TV Emulator uses Google's official Android Emulator backend. Salem is a launcher and control surface; it does not build or redistribute a custom emulator engine.
+The script creates a fresh `.venv-release`, installs exact pinned dependencies and runs Ruff, targeted mypy, pytest and compile checks. It builds only the checked-in relative-path specs, with `console=False`, no UPX and explicit Qt/VC runtime collection. `-ReuseEnvironment` is available for iteration, not a clean release verification.
+
+All native binaries are checked for AMD64 architecture and import closure. VC runtime dependencies must be bundled even if present on the build computer. Windows API/OS DLLs are not redistributed. Plugin/DLL origins and runtime manifests are checked at startup before importing Qt.
+
+Builds are reproducible in toolchain and procedure, not promised byte-for-byte identical: PE timestamps, ZIP metadata and bootloader outputs may vary. Dependency versions and artifact hashes are recorded.
+
+## Verification and outputs
+
+The build tests the packaged GUI at 100%, 150% and 200% scaling, an extracted relocated portable copy, a missing-QtCore negative case, and a Setup-installed copy. PATH is reduced to Windows and foreign Qt plugin variables are supplied to exercise runtime isolation. These tests do **not** create a clean Windows VM.
+
+Only after these checks pass are both `candidate/build_local/` and `candidate/release_github/` replaced. Existing public v1.0 files in the root `build_local/` and `release_github/` are never replaced. Previous candidate copies are retained temporarily under `build/release-stage/previous-*`; a failed promotion rolls back. Close candidate Salem EXEs before rebuilding. No release is published automatically.
+
+Upload one set of the installer/portable/source files, plus the standalone `version.json` asset, README, CHANGELOG, third-party notices, build manifest and hashes. Generic `Setup.exe`, `Portable.zip`, `Source.zip` and branded aliases are byte-identical pairs.
+
+The app and installer remain version 1.0, with internal candidate identifier `rework-2026-09-19`. Executable Windows version resources use 1.0.0.0. No signing certificate is configured; SmartScreen may warn. Optional signing uses `SALEM_SIGNTOOL` (absolute SDK signtool path) and `SALEM_SIGN_THUMBPRINT` (Windows certificate-store identity); configured signing errors fail the build. No private key/password is stored in source.
+
+## Clean-PC release gate
+
+Test both Setup and Portable on a Windows 10 1809+ or Windows 11 x64 PC/VM without Python, Qt, Android Studio or development tools. A `build_tools/clean_pc_smoke.ps1` command is provided. Record OS build, architecture, startup report and logs. The affected customer's original QtCore traceback is still needed to tie a specific loader error to a confirmed cause; missing files, OS incompatibility, quarantine and architecture mismatch must not be conflated.
+
+Then test the live engine: Launch, Stop, Restart, TV Mode/restore, remote/popout, text/fallback, volume commands, diagnostics, preferences, updates and support. Audio audibility and viewport coverage require visual/listening verification, not just ADB exit codes.
+
+## Installer behavior
+
+Setup stages and verifies every payload SHA-256 before replacing the installed app. The existing app is renamed on the same volume and restored if promotion fails. User engine data is separate. Shortcuts use the current user's redirected Desktop/Start Menu and point directly to the EXE. Shortcut errors are reported, not ignored.
+
+The NSIS 3.12 installer checks native architecture and Windows build before the Python setup helper runs. It registers a current-user Apps & Features uninstaller, a direct EXE Start Menu shortcut, optional desktop shortcut and an optional launch-after-install action. Uninstall removes an explicit packaged-file list, preserving unrelated files, settings and engine data. Silent install/upgrade/uninstall are exercised under an isolated `/TEST` mode that does not alter the developer's real shortcuts or registration. Actual shortcut/registry behavior remains a separate live validation gate.
+
+Compiler acquisition is pinned to the official NSIS ZIP and SHA-256. This is an installer shell, not a new native application launcher. The build audits PE metadata/subsystems and scans source/portable files for accidental runtime data, developer paths and common credentials. This automated scan is bounded, not a guarantee about all possible secrets in binary data.
