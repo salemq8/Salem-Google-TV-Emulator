@@ -1,13 +1,53 @@
-.venv*/
+# Python bytecode and tool caches
 __pycache__/
-*.pyc
+*.py[cod]
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
+.coverage
+htmlcov/
+*.egg-info/
+
+# Virtual environments
+.venv*/
+venv/
+
+# Build and release outputs (local only)
 build/
 dist/
 build_local/
 release_github/
-validation/
-*.spec.bak
 candidate/
+*.spec.bak
+
+# Local validation evidence and developer scratch
+validation/
+release_screenshots/
+/*.png
+/launch_tree_console_diagnostics.txt
+
+# Logs and temporary files
+logs/
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+Thumbs.db
+desktop.ini
+
+# Android SDK / JDK / AVD and runtime or user data
+androidsdk/
+android-sdk/
+jdk*/
+.android/
+avd/
+*.avd/
+adbkey
+adbkey.pub
+
+# Credentials and local secrets
+.env
+.env.*
+*.pem
+*.key
